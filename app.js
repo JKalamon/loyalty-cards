@@ -393,10 +393,19 @@ $('#viewerClose').addEventListener('click', back);
 $('#viewerEdit').addEventListener('click', () => {
   if (!viewing) return;
   const c = viewing;
-  editing = c;
+  // Close the viewer visually without changing history depth, then reuse the
+  // top-of-stack entry for the panel so it isn't hidden under the viewer.
+  clearInterval(viewerTimer);
+  viewerTimer = null;
+  wakeLock?.release().catch(() => {});
+  wakeLock = null;
+  viewing = null;
+  viewer.classList.remove('open');
+  viewer.setAttribute('aria-hidden', 'true');
+  if (stack.length) stack[stack.length - 1] = { name: 'panel', close: closePanelNow };
+  else pushUI('panel', closePanelNow);
   panel.classList.add('open');
   panel.setAttribute('aria-hidden', 'false');
-  pushUI('panel', closePanelNow);
   openForm(c.shop, c);
 });
 viewer.addEventListener('click', e => { if (e.target === viewer) back(); });
