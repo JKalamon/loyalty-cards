@@ -1,0 +1,83 @@
+name: CI & Deploy
+
+on:
+  push:
+    branches: [master, main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# Only one deploy at a time; don't cancel an in-progress one.
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Syntax-check scripts
+        run: |
+          node --check app.js
+          node --check sw.js
+          node --check tools/zappka-login.mjs
+
+      - name: Validate manifest JSON
+        run: node -e "JSON.parse(require('fs').readFileSync('manifest.webmanifest','utf8')); console.log('manifest ok')"
+
+      - name: Check required files exist
+        run: |
+          set -e
+          for f in index.html style.css app.js sw.js manifest.webmanifest \
+                   vendor/qrcode.js vendor/JsBarcode.all.min.js vendor/html5-qrcode.min.js \
+                   icons/icon-192.png icons/icon-512.png icons/icon-180.png; do
+            test -f "$f" || { echo "missing: $f"; exit 1; }
+          done
+          echo "all assets present"
+
+      - name: Verify Żabka TOTP against RFC 6238 vectors
+        run: |
+          node -e '
+            const src = require("fs").readFileSync("app.js","utf8");
+            const fn = src.slice(src.indexOf("function hexToBytes"), src.indexOf("const zabkaUrl"));
+            eval(fn + ";globalThis.z=zabkaTotp");
+            const key = Buffer.from("12345678901234567890").toString("hex");
+            Promise.all([59,1111111109,1234567890,2000000000].map(t=>z(key,t))).then(r=>{
+              const exp = ["287082","081804","005924","279037"];
+              if (r.join() !== exp.join()) { console.error("TOTP mismatch", r); process.exit(1); }
+              console.log("TOTP vectors ok:", r.join(" "));
+            });
+          '
+
+  deploy:
+    needs: test
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Assemble site (exclude tooling)
+        run: |
+          mkdir _site
+          cp -r index.html style.css app.js sw.js manifest.webmanifest .nojekyll \
+                icons vendor _site/
+
+      - uses: actions/configure-pages@v5
+
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: _site
+
+      - id: deployment
+        uses: actions/deploy-pages@v4
