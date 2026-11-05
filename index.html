@@ -1,0 +1,124 @@
+<!doctype html>
+<html lang="pl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
+  <meta name="theme-color" content="#111214">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Karty">
+  <title>Karty</title>
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="icon" href="icons/icon-192.png">
+  <link rel="apple-touch-icon" href="icons/icon-180.png">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <main id="home">
+    <div id="grid" class="grid"></div>
+    <div id="empty" class="empty" hidden>
+      <div class="empty-arrow">→</div>
+      <p>Przesuń w prawo,<br>aby dodać kartę</p>
+    </div>
+  </main>
+
+  <!-- Add / edit panel (slides in from the left) -->
+  <section id="panel" class="panel" aria-hidden="true">
+    <header class="panel-head">
+      <button class="icon-btn" id="panelBack" aria-label="Wstecz">←</button>
+      <h1 id="panelTitle">Dodaj kartę</h1>
+      <span></span>
+    </header>
+
+    <div id="pickStep" class="panel-body">
+      <div id="shopGrid" class="grid small"></div>
+      <div class="backup">
+        <button class="link" id="exportBtn">Eksportuj kopię</button>
+        <button class="link" id="importBtn">Importuj kopię</button>
+        <input type="file" id="importFile" accept="application/json,.json" hidden>
+      </div>
+    </div>
+
+    <form id="formStep" class="panel-body form" hidden autocomplete="off">
+      <div id="formPreview" class="tile preview"></div>
+
+      <label id="nameRow">Nazwa
+        <input id="fName" maxlength="30" placeholder="np. Pepco">
+      </label>
+      <label id="colorRow">Kolor
+        <input id="fColor" type="color" value="#5b5f6b">
+      </label>
+
+      <div id="stdFields">
+        <label>Numer karty
+          <div class="row">
+            <input id="fNumber" inputmode="text" placeholder="Wpisz lub zeskanuj">
+            <button type="button" class="btn ghost" id="scanBtn" aria-label="Skanuj">⌁ Skanuj</button>
+          </div>
+        </label>
+        <label>Format kodu
+          <select id="fFormat">
+            <option value="auto">Automatyczny</option>
+            <option value="CODE128">Code 128</option>
+            <option value="EAN13">EAN-13</option>
+            <option value="EAN8">EAN-8</option>
+            <option value="UPC">UPC-A</option>
+            <option value="CODE39">Code 39</option>
+            <option value="ITF">ITF</option>
+            <option value="QR">Kod QR</option>
+          </select>
+        </label>
+      </div>
+
+      <div id="zabkaFields" hidden>
+        <p class="hint">Kod Żappki zmienia się co 30 s (TOTP). Potrzebujesz <b>ployId</b> i <b>loyalSecret</b> ze swojego konta Żappka — np. z pliku konfiguracyjnego Zappka3DS (<code>user_id</code> / <code>hex_secret</code>).</p>
+        <label>ployId (user_id)
+          <input id="fPloy" inputmode="numeric" placeholder="np. 1234567890">
+        </label>
+        <label>loyalSecret (hex_secret)
+          <input id="fSecret" placeholder="ciąg znaków hex" autocapitalize="off" spellcheck="false">
+        </label>
+        <label>…lub wklej JSON z Zappka3DS
+          <textarea id="fZjson" rows="3" placeholder='{"user_id":"…","hex_secret":"…"}'></textarea>
+        </label>
+      </div>
+
+      <label>Notatka
+        <input id="fNote" maxlength="60" placeholder="opcjonalnie">
+      </label>
+
+      <p id="formError" class="error" hidden></p>
+      <button type="submit" class="btn primary">Zapisz</button>
+      <button type="button" class="btn danger" id="deleteBtn" hidden>Usuń kartę</button>
+    </form>
+  </section>
+
+  <!-- Card view -->
+  <section id="viewer" class="viewer" aria-hidden="true">
+    <div class="viewer-inner">
+      <header class="viewer-head">
+        <button class="icon-btn" id="viewerClose" aria-label="Zamknij">✕</button>
+        <h2 id="viewerTitle"></h2>
+        <button class="icon-btn" id="viewerEdit" aria-label="Edytuj">✎</button>
+      </header>
+      <div class="code-box">
+        <div id="codeArea"></div>
+        <div id="codeText" class="code-text"></div>
+        <div id="totpBar" class="totp-bar" hidden><span></span></div>
+      </div>
+      <p id="viewerNote" class="viewer-note"></p>
+    </div>
+  </section>
+
+  <!-- Scanner -->
+  <section id="scanner" class="scanner" hidden>
+    <div id="scanRegion"></div>
+    <button class="btn" id="scanClose">Anuluj</button>
+  </section>
+
+  <script src="vendor/qrcode.js"></script>
+  <script src="vendor/JsBarcode.all.min.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
