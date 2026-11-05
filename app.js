@@ -7,13 +7,17 @@ const SHOPS = [
   { id: 'zabka',     name: 'Żabka',       bg: '#0f9d48', fg: '#ffffff', totp: true },
   { id: 'rossmann',  name: 'Rossmann',    bg: '#ffffff', fg: '#c8102e' },
   { id: 'kaufland',  name: 'Kaufland',    bg: '#e10915', fg: '#ffffff' },
-  { id: 'orlen',     name: 'Orlen Vitay', bg: '#1f1f22', fg: '#ff2b3b' },
+  { id: 'orlen',     name: 'Orlen Vitay', bg: '#1f1f22', fg: '#ff2b3b', format: 'QR',
+    // Vitay QR carries a fixed template, not just the number.
+    wrap: n => `TRANSID 0\nVITAY ${vitayNum(n)}` },
   { id: 'bp',        name: 'bp',          bg: '#007a3d', fg: '#ffffff' },
   { id: 'action',    name: 'Action',      bg: '#0058a3', fg: '#ffffff' },
   { id: 'amic',      name: 'Amic',        bg: '#0b2d5b', fg: '#a6d63a' },
   { id: 'decathlon', name: 'Decathlon',   bg: '#3643ba', fg: '#ffffff' },
 ];
 const shopById = id => SHOPS.find(s => s.id === id);
+// Pull the bare Vitay number out of either a raw number or a scanned "…VITAY <n>" payload.
+const vitayNum = s => (/VITAY\s+(\S+)/i.exec(s)?.[1]) || String(s).trim();
 
 /* ================= Storage ================= */
 const KEY = 'wallet.cards.v1';
@@ -220,6 +224,8 @@ function openForm(shopId, card = null) {
   $('#fColor').value = card?.color || '#5b5f6b';
   $('#fNumber').value = card?.number || '';
   $('#fFormat').value = card?.format || s?.format || 'auto';
+  // Shops with a fixed QR payload (e.g. Orlen Vitay) don't expose the format picker.
+  $('#fFormat').closest('label').hidden = !!s?.wrap;
   $('#fPloy').value = card?.ploy || '';
   $('#fSecret').value = card?.secret || '';
   $('#fZjson').value = '';
@@ -272,8 +278,9 @@ $('#formStep').addEventListener('submit', async e => {
     if (!/^[0-9a-fA-F]+$/.test(c.secret) || c.secret.length % 2) return formError('loyalSecret musi być ciągiem hex o parzystej długości.');
     try { await zabkaTotp(c.secret); } catch (err) { return formError(err.message); }
   } else {
-    c.number = $('#fNumber').value.trim();
-    c.format = $('#fFormat').value;
+    const shop = shopById(draftShop);
+    c.number = shop?.wrap ? vitayNum($('#fNumber').value) : $('#fNumber').value.trim();
+    c.format = shop?.wrap ? 'QR' : $('#fFormat').value;
     if (!c.number) return formError('Podaj numer karty.');
   }
   if (editing) cards = cards.map(x => (x.id === c.id ? c : x));
@@ -349,9 +356,11 @@ async function openViewer(id) {
 
   if (c.shop === 'zabka') startZabka(c);
   else {
-    const fmt = c.format === 'auto' || !c.format ? detectFormat(c.number) : c.format;
-    $('#codeArea').append(fmt === 'QR' ? qrSvg(c.number) : barcodeSvg(c.number, fmt));
-    $('#codeText').textContent = c.number;
+    const shop = shopById(c.shop);
+    const payload = shop?.wrap ? shop.wrap(c.number) : c.number;
+    const fmt = shop?.wrap ? 'QR' : (c.format === 'auto' || !c.format ? detectFormat(c.number) : c.format);
+    $('#codeArea').append(fmt === 'QR' ? qrSvg(payload) : barcodeSvg(payload, fmt));
+    $('#codeText').textContent = shop?.wrap ? vitayNum(c.number) : c.number;
   }
 }
 

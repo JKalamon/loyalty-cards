@@ -1,4 +1,4 @@
-const CACHE = 'karty-v2';
+const CACHE = 'karty-v3';
 const ASSETS = [
   './', 'index.html', 'style.css', 'app.js', 'manifest.webmanifest',
   'vendor/qrcode.js', 'vendor/JsBarcode.all.min.js', 'vendor/html5-qrcode.min.js',
