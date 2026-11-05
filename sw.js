@@ -1,8 +1,11 @@
-const CACHE = 'karty-v3';
+const CACHE = 'karty-v4';
+const LOGOS = ['biedronka', 'lidl', 'zabka', 'rossmann', 'kaufland', 'orlen', 'bp', 'action', 'amic', 'decathlon']
+  .map(n => `logos/${n}.png`);
 const ASSETS = [
   './', 'index.html', 'style.css', 'app.js', 'manifest.webmanifest',
   'vendor/qrcode.js', 'vendor/JsBarcode.all.min.js', 'vendor/html5-qrcode.min.js',
   'icons/icon-180.png', 'icons/icon-192.png', 'icons/icon-512.png',
+  ...LOGOS,
 ];
 
 self.addEventListener('install', e => {

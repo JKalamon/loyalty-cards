@@ -1,19 +1,20 @@
 'use strict';
 
 /* ================= Shops ================= */
+// bg = official brand colour from the Żappka store catalogue; logo = its wordmark.
 const SHOPS = [
-  { id: 'biedronka', name: 'Biedronka',   bg: '#e30613', fg: '#ffffff' },
-  { id: 'lidl',      name: 'Lidl Plus',   bg: '#0050aa', fg: '#ffffff', format: 'QR' },
-  { id: 'zabka',     name: 'Żabka',       bg: '#0f9d48', fg: '#ffffff', totp: true },
-  { id: 'rossmann',  name: 'Rossmann',    bg: '#ffffff', fg: '#c8102e' },
-  { id: 'kaufland',  name: 'Kaufland',    bg: '#e10915', fg: '#ffffff' },
-  { id: 'orlen',     name: 'Orlen Vitay', bg: '#1f1f22', fg: '#ff2b3b', format: 'QR',
+  { id: 'biedronka', name: 'Biedronka',   bg: '#f9e100', fg: '#b9000f', logo: 'logos/biedronka.png' },
+  { id: 'lidl',      name: 'Lidl Plus',   bg: '#1053a5', fg: '#ffffff', logo: 'logos/lidl.png', format: 'QR' },
+  { id: 'zabka',     name: 'Żabka',       bg: '#1b641b', fg: '#ffffff', logo: 'logos/zabka.png', totp: true },
+  { id: 'rossmann',  name: 'Rossmann',    bg: '#ba0029', fg: '#ffffff', logo: 'logos/rossmann.png' },
+  { id: 'kaufland',  name: 'Kaufland',    bg: '#d90000', fg: '#ffffff', logo: 'logos/kaufland.png' },
+  { id: 'orlen',     name: 'Orlen Vitay', bg: '#cf1900', fg: '#ffffff', logo: 'logos/orlen.png', format: 'QR',
     // Vitay QR carries a fixed template, not just the number.
     wrap: n => `TRANSID 0\nVITAY ${vitayNum(n)}` },
-  { id: 'bp',        name: 'bp',          bg: '#007a3d', fg: '#ffffff' },
-  { id: 'action',    name: 'Action',      bg: '#0058a3', fg: '#ffffff' },
-  { id: 'amic',      name: 'Amic',        bg: '#0b2d5b', fg: '#a6d63a' },
-  { id: 'decathlon', name: 'Decathlon',   bg: '#3643ba', fg: '#ffffff' },
+  { id: 'bp',        name: 'bp',          bg: '#35a657', fg: '#ffffff', logo: 'logos/bp.png' },
+  { id: 'action',    name: 'Action',      bg: '#ffffff', fg: '#002d72', logo: 'logos/action.png' },
+  { id: 'amic',      name: 'Amic',        bg: '#ffffff', fg: '#0b2d5b', logo: 'logos/amic.png' },
+  { id: 'decathlon', name: 'Decathlon',   bg: '#424fa2', fg: '#ffffff', logo: 'logos/decathlon.png' },
 ];
 const shopById = id => SHOPS.find(s => s.id === id);
 // Pull the bare Vitay number out of either a raw number or a scanned "…VITAY <n>" payload.
@@ -121,12 +122,22 @@ function barcodeSvg(value, format) {
 
 /* ================= Home grid ================= */
 function tileFor({ bg, fg, name }, sub, shopId) {
-  const t = el('button', 'tile' + (shopId ? ' b-' + shopId : ''));
+  const shop = shopById(shopId);
+  const t = el('button', 'tile' + (shop?.logo ? ' has-logo' : ''));
   t.type = 'button';
   t.style.background = bg;
   t.style.color = fg;
-  t.append(el('div', 'brand', name), el('div', 'sub', sub || ''));
-  if (['biedronka', 'lidl', 'bp'].includes(shopId)) t.append(el('span', 'dot'));
+  if (shop?.logo) {
+    const img = el('img', 'logo');
+    img.src = shop.logo;
+    img.alt = name;
+    img.loading = 'lazy';
+    img.draggable = false;
+    t.append(img);
+  } else {
+    t.append(el('div', 'brand', name));
+  }
+  if (sub) t.append(el('div', 'sub', sub));
   return t;
 }
 

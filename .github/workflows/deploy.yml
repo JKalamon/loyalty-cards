@@ -42,6 +42,9 @@ jobs:
                    icons/icon-192.png icons/icon-512.png icons/icon-180.png; do
             test -f "$f" || { echo "missing: $f"; exit 1; }
           done
+          for s in biedronka lidl zabka rossmann kaufland orlen bp action amic decathlon; do
+            test -f "logos/$s.png" || { echo "missing logo: $s"; exit 1; }
+          done
           echo "all assets present"
 
       - name: Verify Żabka TOTP against RFC 6238 vectors
@@ -71,7 +74,7 @@ jobs:
         run: |
           mkdir _site
           cp -r index.html style.css app.js sw.js manifest.webmanifest .nojekyll \
-                icons vendor _site/
+                icons vendor logos _site/
 
       - uses: actions/configure-pages@v5
 
