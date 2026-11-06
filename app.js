@@ -402,6 +402,7 @@ async function openViewer(id) {
   $('#codeArea').replaceChildren();
   $('#codeText').textContent = '';
   $('#totpBar').hidden = true;
+  $('.code-box').classList.remove('text-only');
 
   viewer.classList.add('open');
   viewer.setAttribute('aria-hidden', 'false');
@@ -412,9 +413,13 @@ async function openViewer(id) {
   if (c.shop === 'zabka') startZabka(c);
   else {
     const shop = shopById(c.shop);
-    const payload = shop?.wrap ? shop.wrap(c.number) : c.number;
     const fmt = shop?.wrap ? 'QR' : (c.format === 'auto' || !c.format ? detectFormat(c.number) : c.format);
-    $('#codeArea').append(fmt === 'QR' ? qrSvg(payload) : barcodeSvg(payload, fmt));
+    if (fmt === 'TEXT') {
+      $('.code-box').classList.add('text-only'); // no barcode/QR, just the value
+    } else {
+      const payload = shop?.wrap ? shop.wrap(c.number) : c.number;
+      $('#codeArea').append(fmt === 'QR' ? qrSvg(payload) : barcodeSvg(payload, fmt));
+    }
     $('#codeText').textContent = shop?.wrap ? vitayNum(c.number) : c.number;
   }
 }

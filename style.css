@@ -1,22 +1,29 @@
 :root {
-  --bg: #111214;
-  --surface: #1c1d21;
-  --surface-2: #26282d;
+  --bg: #0e1030;
+  --surface: rgba(255, 255, 255, .06);
+  --surface-2: rgba(255, 255, 255, .11);
   --text: #f2f2f4;
-  --muted: #9a9ca5;
-  --accent: #4f8cff;
+  --muted: #a7acc4;
+  --accent: #5b8cff;
   --danger: #ff5a5f;
   --gap: 12px;
   --radius: 16px;
   --safe-t: env(safe-area-inset-top, 0px);
   --safe-b: env(safe-area-inset-bottom, 0px);
   color-scheme: dark;
+  /* Juicy teal→blue→purple wash with bokeh glows, matching the app icon. */
+  --app-bg:
+    radial-gradient(60% 45% at 12% 4%, rgba(45, 212, 206, .40), transparent 60%),
+    radial-gradient(55% 45% at 92% 10%, rgba(99, 132, 255, .32), transparent 60%),
+    radial-gradient(75% 60% at 100% 100%, rgba(192, 38, 211, .42), transparent 60%),
+    radial-gradient(70% 55% at 0% 95%, rgba(124, 58, 237, .40), transparent 60%),
+    linear-gradient(165deg, #122a44 0%, #141637 45%, #1d1140 100%);
 }
 
 * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
 html, body { margin: 0; height: 100%; }
 body {
-  background: var(--bg);
+  background: var(--app-bg) fixed, var(--bg);
   color: var(--text);
   font: 16px/1.4 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
   overflow: hidden;
@@ -119,7 +126,7 @@ button, input, select, textarea { font: inherit; color: inherit; }
 /* ---------- Panel ---------- */
 .panel {
   position: fixed; inset: 0;
-  background: var(--bg);
+  background: var(--app-bg) fixed, var(--bg);
   transform: translateX(-100%);
   transition: transform .28s cubic-bezier(.2,.8,.2,1);
   display: flex; flex-direction: column;
@@ -210,6 +217,13 @@ button, input, select, textarea { font: inherit; color: inherit; }
   font: 600 18px/1.2 ui-monospace, Menlo, monospace;
   letter-spacing: .08em; text-align: center; word-break: break-all;
   -webkit-user-select: text; user-select: text;
+}
+/* Text-only card: no barcode/QR, just the value shown large. */
+.code-box.text-only #codeArea { display: none; }
+.code-box.text-only .code-text {
+  font-size: clamp(26px, 8vw, 40px);
+  letter-spacing: .04em;
+  padding: 28px 6px;
 }
 .totp-bar { width: 70%; height: 4px; border-radius: 2px; background: #e6e6e6; overflow: hidden; }
 .totp-bar span { display: block; height: 100%; background: #00a650; width: 100%; transform-origin: left; }

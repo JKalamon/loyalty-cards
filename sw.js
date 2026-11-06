@@ -1,4 +1,4 @@
-const CACHE = 'karty-v5';
+const CACHE = 'karty-v6';
 const LOGOS = [
   'biedronka', 'lidl', 'zabka', 'rossmann', 'kaufland', 'orlen', 'bp', 'action', 'amic', 'decathlon',
   '4f', 'adidas', 'auchan', 'carrefour', 'ccc', 'circlek', 'deichmann', 'diagnostyka', 'hebe', 'hm',
