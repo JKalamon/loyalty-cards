@@ -14,7 +14,33 @@ const SHOPS = [
   { id: 'bp',        name: 'bp',          bg: '#35a657', fg: '#ffffff', logo: 'logos/bp.png' },
   { id: 'action',    name: 'Action',      bg: '#ffffff', fg: '#002d72', logo: 'logos/action.png' },
   { id: 'amic',      name: 'Amic',        bg: '#ffffff', fg: '#0b2d5b', logo: 'logos/amic.png' },
-  { id: 'decathlon', name: 'Decathlon',   bg: '#424fa2', fg: '#ffffff', logo: 'logos/decathlon.png' },
+  { id: 'decathlon', name: 'Decathlon',   bg: '#424fa2', logo: 'logos/decathlon.png' },
+  { id: '4f',        name: '4F',          bg: '#010101', logo: 'logos/4f.png' },
+  { id: 'adidas',    name: 'Adidas',      bg: '#000000', logo: 'logos/adidas.png' },
+  { id: 'auchan',    name: 'Auchan',      bg: '#d52327', logo: 'logos/auchan.png' },
+  { id: 'carrefour', name: 'Carrefour',   bg: '#3c59a8', logo: 'logos/carrefour.png' },
+  { id: 'ccc',       name: 'CCC',         bg: '#060708', logo: 'logos/ccc.png' },
+  { id: 'circlek',   name: 'Circle K',    bg: '#eb3327', logo: 'logos/circlek.png' },
+  { id: 'deichmann', name: 'Deichmann',   bg: '#009661', logo: 'logos/deichmann.png' },
+  { id: 'diagnostyka', name: 'Diagnostyka', bg: '#076969', logo: 'logos/diagnostyka.png' },
+  { id: 'hebe',      name: 'Hebe',        bg: '#da0e7e', logo: 'logos/hebe.png' },
+  { id: 'hm',        name: 'H&M',         bg: '#f8f9fa', logo: 'logos/hm.png' },
+  { id: 'house',     name: 'House',       bg: '#000000', logo: 'logos/house.png' },
+  { id: 'ikea',      name: 'IKEA',        bg: '#0057ac', logo: 'logos/ikea.png' },
+  { id: 'jula',      name: 'Jula',        bg: '#d1252c', logo: 'logos/jula.png' },
+  { id: 'kik',       name: 'KiK',         bg: '#d41a00', logo: 'logos/kik.png' },
+  { id: 'leroymerlin', name: 'Leroy Merlin', bg: '#ffffff', logo: 'logos/leroymerlin.png' },
+  { id: 'lewiatan',  name: 'Lewiatan',    bg: '#f4dc42', logo: 'logos/lewiatan.png' },
+  { id: 'mediamarkt', name: 'MediaMarkt', bg: '#d50000', logo: 'logos/mediamarkt.png' },
+  { id: 'modivo',    name: 'Modivo',      bg: '#050505', logo: 'logos/modivo.png' },
+  { id: 'mol',       name: 'MOL',         bg: '#ffffff', logo: 'logos/mol.png' },
+  { id: 'moya',      name: 'Moya',        bg: '#034988', logo: 'logos/moya.png' },
+  { id: 'obi',       name: 'OBI',         bg: '#ffffff', logo: 'logos/obi.png' },
+  { id: 'pepco',     name: 'Pepco',       bg: '#027ad8', logo: 'logos/pepco.png' },
+  { id: 'polomarket', name: 'Polo Market', bg: '#e81f2b', logo: 'logos/polomarket.png' },
+  { id: 'selgros',   name: 'Selgros',     bg: '#da1f26', logo: 'logos/selgros.png' },
+  { id: 'shell',     name: 'Shell',       bg: '#f7ce00', logo: 'logos/shell.png' },
+  { id: 'tesco',     name: 'Tesco',       bg: '#1c54a1', logo: 'logos/tesco.png' },
 ];
 const shopById = id => SHOPS.find(s => s.id === id);
 // Pull the bare Vitay number out of either a raw number or a scanned "…VITAY <n>" payload.
@@ -52,7 +78,7 @@ function contrastFg(hex) {
 
 function cardStyle(c) {
   const s = shopById(c.shop);
-  if (s) return { bg: s.bg, fg: s.fg, name: c.name || s.name };
+  if (s) return { bg: s.bg, fg: s.fg || contrastFg(s.bg), name: c.name || s.name };
   const bg = c.color || '#5b5f6b';
   return { bg, fg: contrastFg(bg), name: c.name || 'Karta' };
 }
@@ -141,22 +167,40 @@ function tileFor({ bg, fg, name }, sub, shopId) {
   return t;
 }
 
-function subtitle(c) {
-  if (c.note) return c.note;
-  if (c.shop === 'zabka') return 'Żappka';
-  if (c.number) return '•••• ' + c.number.slice(-4);
-  return '';
-}
+// Only show the note, if any — no masked card number.
+const subtitle = c => c.note || '';
 
+let sortable = null;
 function renderGrid() {
   const g = $('#grid');
   g.replaceChildren();
   for (const c of cards) {
     const t = tileFor(cardStyle(c), subtitle(c), c.shop);
+    t.dataset.id = c.id;
     t.addEventListener('click', () => openViewer(c.id));
     g.append(t);
   }
   $('#empty').hidden = cards.length > 0;
+  initSortable(g);
+}
+
+// Long-press a tile to drag it into a new position; order persists in storage.
+function initSortable(g) {
+  if (sortable || typeof Sortable === 'undefined') return;
+  sortable = Sortable.create(g, {
+    animation: 150,
+    delay: 300,
+    delayOnTouchOnly: true,
+    touchStartThreshold: 8,
+    ghostClass: 'tile-ghost',
+    chosenClass: 'tile-chosen',
+    onChoose: () => navigator.vibrate?.(30),
+    onEnd: e => {
+      if (e.oldIndex == null || e.newIndex == null || e.oldIndex === e.newIndex) return;
+      cards.splice(e.newIndex, 0, cards.splice(e.oldIndex, 1)[0]);
+      saveCards();
+    },
+  });
 }
 
 /* ================= Navigation stack (Android back button / history) ================= */

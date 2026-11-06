@@ -93,8 +93,20 @@ button, input, select, textarea { font: inherit; color: inherit; }
   padding: 2px 9px; border-radius: 999px;
   font-size: 11px; backdrop-filter: blur(3px);
 }
+/* Cards without a logo (custom / loyalty) centre their name. */
+.tile:not(.has-logo) {
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  gap: 8px;
+}
+.tile:not(.has-logo) .brand { width: 100%; }
 .tile.new-other { background: var(--surface-2); color: var(--text); }
 .tile.new-other .brand { font-weight: 600; }
+
+/* Drag-to-reorder states */
+.tile-ghost { opacity: .35; }
+.tile-chosen { transform: scale(1.05); box-shadow: 0 12px 30px rgba(0,0,0,.55); }
 
 .empty {
   position: fixed; inset: 0;
