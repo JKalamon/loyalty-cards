@@ -213,6 +213,7 @@ button, input, select, textarea { font: inherit; color: inherit; }
 #codeArea { width: 100%; display: flex; justify-content: center; }
 #codeArea svg, #codeArea img { max-width: 100%; height: auto; display: block; }
 #codeArea .qr { width: min(78vw, 340px); height: auto; image-rendering: pixelated; }
+#codeArea .pdf417 { width: 100%; height: auto; image-rendering: pixelated; }
 .code-text {
   font: 600 18px/1.2 ui-monospace, Menlo, monospace;
   letter-spacing: .08em; text-align: center; word-break: break-all;

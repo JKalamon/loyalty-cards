@@ -4,3 +4,5 @@ apk/
 apk_dec/
 .DS_Store
 *.log
+image.png
+*.png.orig

@@ -1,4 +1,4 @@
-const CACHE = 'karty-v6';
+const CACHE = 'karty-v7';
 const LOGOS = [
   'biedronka', 'lidl', 'zabka', 'rossmann', 'kaufland', 'orlen', 'bp', 'action', 'amic', 'decathlon',
   '4f', 'adidas', 'auchan', 'carrefour', 'ccc', 'circlek', 'deichmann', 'diagnostyka', 'hebe', 'hm',
@@ -7,7 +7,8 @@ const LOGOS = [
 ].map(n => `logos/${n}.png`);
 const ASSETS = [
   './', 'index.html', 'style.css', 'app.js', 'manifest.webmanifest',
-  'vendor/qrcode.js', 'vendor/JsBarcode.all.min.js', 'vendor/html5-qrcode.min.js', 'vendor/Sortable.min.js',
+  'vendor/qrcode.js', 'vendor/JsBarcode.all.min.js', 'vendor/html5-qrcode.min.js',
+  'vendor/pdf417.min.js', 'vendor/Sortable.min.js',
   'icons/icon-180.png', 'icons/icon-192.png', 'icons/icon-512.png',
   ...LOGOS,
 ];

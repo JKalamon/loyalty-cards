@@ -3,7 +3,7 @@
 /* ================= Shops ================= */
 // bg = official brand colour from the Żappka store catalogue; logo = its wordmark.
 const SHOPS = [
-  { id: 'biedronka', name: 'Biedronka',   bg: '#f9e100', fg: '#b9000f', logo: 'logos/biedronka.png' },
+  { id: 'biedronka', name: 'Biedronka',   bg: '#f9e100', fg: '#b9000f', logo: 'logos/biedronka.png', format: 'PDF417' },
   { id: 'lidl',      name: 'Lidl Plus',   bg: '#1053a5', fg: '#ffffff', logo: 'logos/lidl.png', format: 'QR' },
   { id: 'zabka',     name: 'Żabka',       bg: '#1b641b', fg: '#ffffff', logo: 'logos/zabka.png', totp: true },
   { id: 'rossmann',  name: 'Rossmann',    bg: '#ba0029', fg: '#ffffff', logo: 'logos/rossmann.png' },
@@ -143,6 +143,33 @@ function barcodeSvg(value, format) {
   catch { JsBarcode(svg, value, { ...opts, format: 'CODE128' }); }
   svg.removeAttribute('width'); svg.removeAttribute('height');
   svg.style.width = '100%';
+  return svg;
+}
+
+// PDF417 (2D stacked) — used by Biedronka et al. Matrix comes from a TCPDF port.
+const PDF417_CANVAS = { getContext: () => ({ scale() {}, fillRect() {} }), set width(_) {}, set height(_) {} };
+function pdf417Svg(value) {
+  PDF417.draw(value, PDF417_CANVAS, 2, -1);
+  const b = PDF417.barcode_array;
+  if (!b || !b.bcode || !b.bcode.length) throw new Error('PDF417 error');
+  const m = 2, cols = b.num_cols, rows = b.num_rows;
+  let d = '';
+  for (let y = 0; y < rows; y++) {
+    const row = b.bcode[y];
+    for (let x = 0; x < cols;) {
+      if (row[x] == 1) {
+        let w = 1;
+        while (x + w < cols && row[x + w] == 1) w++;
+        d += `M${x + m} ${y + m}h${w}v1h-${w}z`;
+        x += w;
+      } else x++;
+    }
+  }
+  const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+  svg.setAttribute('viewBox', `0 0 ${cols + m * 2} ${rows + m * 2}`);
+  svg.setAttribute('shape-rendering', 'crispEdges');
+  svg.classList.add('pdf417');
+  svg.innerHTML = `<rect width="${cols + m * 2}" height="${rows + m * 2}" fill="#fff"/><path d="${d}" fill="#000"/>`;
   return svg;
 }
 
@@ -413,12 +440,18 @@ async function openViewer(id) {
   if (c.shop === 'zabka') startZabka(c);
   else {
     const shop = shopById(c.shop);
-    const fmt = shop?.wrap ? 'QR' : (c.format === 'auto' || !c.format ? detectFormat(c.number) : c.format);
+    const fmt = shop?.wrap ? 'QR'
+      : (c.format && c.format !== 'auto') ? c.format
+      : (shop?.format && shop.format !== 'auto') ? shop.format
+      : detectFormat(c.number);
     if (fmt === 'TEXT') {
       $('.code-box').classList.add('text-only'); // no barcode/QR, just the value
     } else {
       const payload = shop?.wrap ? shop.wrap(c.number) : c.number;
-      $('#codeArea').append(fmt === 'QR' ? qrSvg(payload) : barcodeSvg(payload, fmt));
+      $('#codeArea').append(
+        fmt === 'QR' ? qrSvg(payload) :
+        fmt === 'PDF417' ? pdf417Svg(payload) :
+        barcodeSvg(payload, fmt));
     }
     $('#codeText').textContent = shop?.wrap ? vitayNum(c.number) : c.number;
   }
@@ -494,7 +527,7 @@ function loadScript(src) {
     document.head.append(s);
   });
 }
-const FORMAT_MAP = { EAN_13: 'EAN13', EAN_8: 'EAN8', UPC_A: 'UPC', CODE_128: 'CODE128', CODE_39: 'CODE39', ITF: 'ITF', QR_CODE: 'QR' };
+const FORMAT_MAP = { EAN_13: 'EAN13', EAN_8: 'EAN8', UPC_A: 'UPC', CODE_128: 'CODE128', CODE_39: 'CODE39', ITF: 'ITF', QR_CODE: 'QR', PDF_417: 'PDF417' };
 
 $('#scanBtn').addEventListener('click', async () => {
   try {

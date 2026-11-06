@@ -17,8 +17,8 @@ Na telefonie: otwórz link → *Dodaj do ekranu głównego* (Safari) / *Zainstal
   Circle K, IKEA, Auchan, CCC, 4F, Adidas, Carrefour, Deichmann, Diagnostyka, Hebe,
   H&M, House, Jula, KiK, Lewiatan, Leroy Merlin, MediaMarkt, MOL, Modivo, Moya, OBI,
   Pepco, Polo Market, Shell, Selgros, Tesco) oraz dowolna **„Inna karta"**.
-- 🔢 Kody kreskowe (EAN-13/8, UPC, Code 128/39, ITF), **kody QR** oraz
-  **„tylko tekst"** (np. kod do bramy / numer klubowicza bez kodu).
+- 🔢 Kody kreskowe (EAN-13/8, UPC, Code 128/39, ITF), **kody QR**,
+  **PDF417** (karty Biedronki) oraz **„tylko tekst"** (np. kod do bramy bez kodu).
 - 📷 Skanowanie numeru aparatem.
 - 🟢 **Żabka (Żappka)** — dynamiczny kod co 30 s (TOTP), identyczny z oryginalną
   aplikacją. Wymaga jednorazowego podania `ployId` + `loyalSecret`
